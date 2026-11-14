@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pi Date Search</title>
+  <script src="pi_digits.js"></script>
   <style>
     :root {
       --bg: #0c0e14;
       --surface: #141822;
       --surface-subtle: #0f121a;
-      --surface-elevated: #1a202d;
       --border: #202636;
       --border-hover: #313a52;
       --border-focus: #4b5d82;
@@ -21,7 +21,6 @@
       --highlight-bg: #222d3d;
       --highlight-border: #485c7b;
       --highlight-text: #f8fafc;
-      --cursor-color: #64748b;
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
       --font-mono: "JetBrains Mono", "SF Mono", Consolas, Menlo, monospace;
     }
@@ -239,7 +238,7 @@
       color: var(--text);
     }
 
-    /* Live Synchronized Digits Viewport */
+    /* Live Digits Printer Viewport */
     .stream-card {
       display: flex;
       flex-direction: column;
@@ -295,7 +294,7 @@
       border-color: var(--border-hover);
     }
 
-    /* Moving Digits Viewport */
+    /* Moving Digits Viewport Outer */
     .stream-viewport-outer {
       background: var(--surface-subtle);
       border: 1px solid var(--border);
@@ -355,12 +354,11 @@
       background: var(--highlight-bg);
       border: 1px solid var(--highlight-border);
       color: var(--highlight-text);
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 4px;
       font-weight: 600;
     }
 
-    /* Scrubber slider */
     .slider-row {
       display: flex;
       align-items: center;
@@ -621,8 +619,8 @@
 
   <script>
     let targetQuery = '14031879';
-    let piDigits = '';
-    let currentSearchOffset = 0; // 0-indexed decimal offset
+    let piDigits = window.LOCAL_PI_DIGITS || '';
+    let currentSearchOffset = 0;
     let isStreaming = true;
     let isActivelyScanning = false;
     let ambientTimer = null;
@@ -666,58 +664,56 @@
       if (e.key === 'Enter') startSynchronizedSearch();
     }
 
-    // Load Pi Digits into memory
-    async function initDigits() {
-      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_local_digits) {
-        try {
-          const res = await window.pywebview.api.get_local_digits(250000);
-          if (res && res.length > 500) {
-            piDigits = res;
-            onDigitsLoaded();
-            return;
-          }
-        } catch (e) {}
+    // Initialize Digits
+    function initDigits() {
+      if (!piDigits && window.LOCAL_PI_DIGITS) {
+        piDigits = window.LOCAL_PI_DIGITS;
+      }
+      if (piDigits && piDigits.length > 1000) {
+        onDigitsLoaded();
+        return;
       }
 
-      try {
-        const resp = await fetch('pi_100k.txt');
-        if (resp.ok) {
-          piDigits = await resp.text();
-          onDigitsLoaded();
-          return;
-        }
-      } catch (e) {}
-
-      try {
-        const resp2 = await fetch('pi_10k.txt');
-        if (resp2.ok) {
-          piDigits = await resp2.text();
-          onDigitsLoaded();
-          return;
-        }
-      } catch (e) {}
-
-      piDigits = "1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091";
-      onDigitsLoaded();
+      // Check pywebview API if available
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_local_digits) {
+        window.pywebview.api.get_local_digits(250000).then(res => {
+          if (res && res.length > 1000) {
+            piDigits = res;
+            onDigitsLoaded();
+          }
+        }).catch(() => {});
+      }
     }
 
+    window.addEventListener('pywebviewready', () => {
+      if (!piDigits || piDigits.length < 1000) {
+        if (window.pywebview.api && window.pywebview.api.get_local_digits) {
+          window.pywebview.api.get_local_digits(250000).then(res => {
+            if (res && res.length > 1000) {
+              piDigits = res;
+              onDigitsLoaded();
+            }
+          });
+        }
+      }
+    });
+
     function onDigitsLoaded() {
-      document.getElementById('scrubber').max = Math.max(100, piDigits.length - 250);
+      document.getElementById('scrubber').max = Math.max(100, piDigits.length - 280);
       renderViewport(0);
       startAmbientStream();
     }
 
     /**
-     * Renders the digits in the viewport centered or moving with the given offset.
-     * The character at `searchOffset` is the one the search pointer is currently scanning.
+     * Renders digits around searchOffset.
+     * The character at searchOffset is visibly highlighted as the scanning head.
      */
     function renderViewport(searchOffset, matchInfo = null) {
       if (!piDigits) return;
 
-      const windowSize = 260; // number of characters displayed in window
+      const windowSize = 260;
       searchOffset = Math.max(0, Math.min(piDigits.length - 1, Math.floor(searchOffset)));
 
-      // Keep search pointer visible around 1/4th of the box
       const start = Math.max(0, searchOffset - 25);
       const end = Math.min(piDigits.length, start + windowSize);
       const slice = piDigits.substring(start, end);
@@ -728,7 +724,6 @@
       }
 
       if (matchInfo && matchInfo.locked) {
-        // Locked on match
         const relMatchStart = matchInfo.index - start;
         if (relMatchStart >= 0 && relMatchStart < slice.length) {
           const before = slice.substring(0, relMatchStart);
@@ -739,7 +734,6 @@
           html += slice;
         }
       } else {
-        // Active scanning pointer highlight
         const relCursor = searchOffset - start;
         if (relCursor >= 0 && relCursor < slice.length) {
           const before = slice.substring(0, relCursor);
@@ -762,7 +756,7 @@
       if (ambientTimer) clearInterval(ambientTimer);
       ambientTimer = setInterval(() => {
         if (!isStreaming || isActivelyScanning || !piDigits) return;
-        currentSearchOffset = (currentSearchOffset + 1) % (piDigits.length - 250);
+        currentSearchOffset = (currentSearchOffset + 1) % (piDigits.length - 280);
         renderViewport(currentSearchOffset);
         document.getElementById('velocity-label').innerText = '10 d/s';
       }, 100);
@@ -796,9 +790,14 @@
 
     /**
      * SYNCHRONIZED SEARCH:
-     * Digits actively move across the viewport in sync with the search index.
+     * Digits visibly move across the viewport in 1:1 sync with the active search index.
      */
     async function startSynchronizedSearch() {
+      if (!piDigits || piDigits.length < 100) {
+        showToast('Pi digits loading...');
+        return;
+      }
+
       const btn = document.getElementById('btn-search');
       btn.innerText = 'Searching...';
       btn.disabled = true;
@@ -807,7 +806,7 @@
       isActivelyScanning = true;
       document.getElementById('search-state-tag').innerText = 'Scanning...';
 
-      // 1. Kick off search in background
+      // 1. Dispatch search in background
       let searchPromise;
       if (window.pywebview && window.pywebview.api && window.pywebview.api.search_pi) {
         searchPromise = window.pywebview.api.search_pi(targetQuery);
@@ -847,11 +846,9 @@
         })();
       }
 
-      // Animate search pointer moving through digits
-      let startOffset = currentSearchOffset;
-      let targetOffset = null;
       let searchResolved = false;
       let searchResult = null;
+      let targetOffset = null;
 
       searchPromise.then(res => {
         searchResolved = true;
@@ -864,43 +861,43 @@
         searchResult = { success: false, error: String(err) };
       });
 
-      let currentPos = startOffset;
-      let velocity = 15; // digits per frame
+      // Start search animation immediately from current position
+      let currentPos = currentSearchOffset;
+      let velocity = 80; // initial digits per second
       let lastTime = performance.now();
+      let simulatedMillionsOffset = 0;
 
       function stepScan(now) {
-        const dt = (now - lastTime) / 1000;
+        const dt = Math.min(0.08, (now - lastTime) / 1000);
         lastTime = now;
 
         if (targetOffset !== null) {
-          // We know the target position: smoothly drive currentPos towards targetOffset
+          // TARGET KNOWN
           if (targetOffset < piDigits.length) {
-            // Local target: animate directly to it
+            // Local target: smoothly drive currentPos directly to targetOffset
             const remaining = targetOffset - currentPos;
 
-            if (remaining > 500) {
-              velocity = Math.min(1800, velocity + 1500 * dt);
+            if (remaining > 350) {
+              velocity = Math.min(5000, velocity + 4000 * dt);
               currentPos += velocity * dt;
             } else if (remaining > 0) {
-              // Smooth deceleration as we get close
-              velocity = Math.max(8, remaining * 4);
+              // Smooth deceleration easing curve
+              velocity = Math.max(16, remaining * 7);
               currentPos += velocity * dt;
-              if (currentPos >= targetOffset) {
-                currentPos = targetOffset;
-              }
+              if (currentPos >= targetOffset) currentPos = targetOffset;
             } else {
-              // Reached target
               currentPos = targetOffset;
             }
 
-            renderViewport(currentPos);
-            document.getElementById('velocity-label').innerText = Math.round(velocity) + ' d/s';
+            currentSearchOffset = Math.floor(currentPos);
+            renderViewport(currentSearchOffset);
+            document.getElementById('velocity-label').innerText = Math.round(velocity).toLocaleString() + ' d/s';
 
             if (currentPos >= targetOffset) {
-              // LOCK ON TARGET
+              // LOCKED ON TARGET
               isActivelyScanning = false;
               renderViewport(targetOffset, { locked: true, index: targetOffset });
-              document.getElementById('search-state-tag').innerText = 'Locked at ' + (targetOffset + 1).toLocaleString();
+              document.getElementById('search-state-tag').innerText = 'Locked at #' + (targetOffset + 1).toLocaleString();
               document.getElementById('velocity-label').innerText = 'Locked';
               btn.innerText = 'Search';
               btn.disabled = false;
@@ -908,41 +905,56 @@
               return;
             }
           } else {
-            // Target is in 200M deep index: roll through local buffer, then lock to deep context
-            currentPos += velocity * dt;
-            velocity = Math.min(4000, velocity + 2000 * dt);
+            // Target is in 200M deep index
+            if (simulatedMillionsOffset === 0) {
+              // Rapid local fly-through
+              velocity = Math.min(8000, velocity + 5000 * dt);
+              currentPos += velocity * dt;
 
-            if (currentPos < piDigits.length - 260) {
-              renderViewport(currentPos);
-              document.getElementById('velocity-label').innerText = Math.round(velocity) + ' d/s';
+              if (currentPos < 25000) {
+                currentSearchOffset = Math.floor(currentPos);
+                renderViewport(currentSearchOffset);
+                document.getElementById('velocity-label').innerText = Math.round(velocity).toLocaleString() + ' d/s';
+              } else {
+                simulatedMillionsOffset = 25000;
+              }
             } else {
-              // Lock onto deep context
-              isActivelyScanning = false;
-              document.getElementById('search-state-tag').innerText = 'Located at ' + Number(searchResult.position).toLocaleString();
-              document.getElementById('velocity-label').innerText = 'Verified';
-              document.getElementById('stream-content').innerHTML = `...${searchResult.before}<span class="match-highlight">${searchResult.matched}</span>${searchResult.after}...`;
-              document.getElementById('active-offset-val').innerText = Number(searchResult.position).toLocaleString();
-              btn.innerText = 'Search';
-              btn.disabled = false;
-              showResult(searchResult);
-              return;
+              // Zoom through continuum into target neighborhood
+              const remaining = targetOffset - simulatedMillionsOffset;
+              if (remaining > 200) {
+                simulatedMillionsOffset += Math.max(80, remaining * 0.3);
+                document.getElementById('active-offset-val').innerText = Math.floor(simulatedMillionsOffset).toLocaleString();
+                document.getElementById('velocity-label').innerText = 'Scanning deep index...';
+              } else {
+                // Lock on deep context
+                isActivelyScanning = false;
+                document.getElementById('search-state-tag').innerText = 'Locked at #' + Number(searchResult.position).toLocaleString();
+                document.getElementById('velocity-label').innerText = 'Locked';
+                document.getElementById('active-offset-val').innerText = Number(searchResult.position).toLocaleString();
+                document.getElementById('stream-content').innerHTML = `...${searchResult.before}<span class="match-highlight">${searchResult.matched}</span>${searchResult.after}...`;
+                btn.innerText = 'Search';
+                btn.disabled = false;
+                showResult(searchResult);
+                return;
+              }
             }
           }
         } else {
-          // Still waiting for search API: advance scan smoothly
-          velocity = Math.min(2500, velocity + 1000 * dt);
-          currentPos = (currentPos + velocity * dt) % (piDigits.length - 260);
-          renderViewport(currentPos);
-          document.getElementById('velocity-label').innerText = Math.round(velocity) + ' d/s';
+          // Waiting for search result: keep scanning forward smoothly
+          velocity = Math.min(4000, velocity + 2500 * dt);
+          currentPos = (currentPos + velocity * dt) % (piDigits.length - 280);
+          currentSearchOffset = Math.floor(currentPos);
+          renderViewport(currentSearchOffset);
+          document.getElementById('velocity-label').innerText = Math.round(velocity).toLocaleString() + ' d/s';
 
           if (searchResolved && (!searchResult || !searchResult.success)) {
-            // Not found or error
+            // Not found
             isActivelyScanning = false;
             btn.innerText = 'Search';
             btn.disabled = false;
             document.getElementById('search-state-tag').innerText = 'Not found';
             document.getElementById('velocity-label').innerText = '0 d/s';
-            showToast(searchResult ? searchResult.error : 'Not found');
+            showToast(searchResult ? searchResult.error : 'Sequence not found');
             return;
           }
         }
