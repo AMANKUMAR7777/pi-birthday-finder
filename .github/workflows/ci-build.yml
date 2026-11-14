@@ -12,8 +12,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build on ${{ matrix.os }} (${{ matrix.target }})
+  build-rust:
+    name: Build Rust Engine (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,15 +22,15 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             binary_name: pi-birthday-finder
-            release_name: pi-birthday-finder-linux-x86_64
+            release_name: pi-birthday-finder-engine-linux-x86_64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             binary_name: pi-birthday-finder.exe
-            release_name: pi-birthday-finder-windows-x86_64.exe
+            release_name: pi-birthday-finder-engine-windows-x86_64.exe
           - os: macos-latest
             target: aarch64-apple-darwin
             binary_name: pi-birthday-finder
-            release_name: pi-birthday-finder-macos-arm64
+            release_name: pi-birthday-finder-engine-macos-arm64
 
     steps:
       - name: Checkout source code
@@ -65,9 +65,61 @@ jobs:
           name: ${{ matrix.release_name }}
           path: dist/${{ matrix.release_name }}
 
+  build-python-gui:
+    name: Build Desktop GUI (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: pi-date-search-linux-x86_64
+            pkg_cmd: |
+              pyinstaller --name pi-date-search-linux-x86_64 --onefile --noconfirm --add-data "gui:gui" run_app.py
+              cd dist && tar -czf pi-date-search-linux-x86_64.tar.gz pi-date-search-linux-x86_64
+          - os: windows-latest
+            artifact_name: pi-date-search-windows-x86_64
+            pkg_cmd: |
+              pyinstaller --name pi-date-search-windows-x86_64 --onefile --noconfirm --add-data "gui;gui" run_app.py
+              Compress-Archive -Path dist/pi-date-search-windows-x86_64.exe -DestinationPath dist/pi-date-search-windows-x86_64.zip
+          - os: macos-latest
+            artifact_name: pi-date-search-macos
+            pkg_cmd: |
+              pyinstaller --name pi-date-search-macos --onefile --noconfirm --add-data "gui:gui" run_app.py
+              cd dist && tar -czf pi-date-search-macos.tar.gz pi-date-search-macos
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Linux WebKitGTK Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1 libgirepository1.0-dev
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pywebview pyinstaller requests Pillow
+
+      - name: Build Standalone Executable
+        run: ${{ matrix.pkg_cmd }}
+
+      - name: Upload GUI Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/*
+
   release:
     name: Publish GitHub Release
-    needs: build
+    needs: [build-rust, build-python-gui]
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:

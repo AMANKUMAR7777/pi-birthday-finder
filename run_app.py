@@ -11,8 +11,12 @@ import time
 import requests
 import webview
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-GUI_DIR = os.path.join(SCRIPT_DIR, "gui")
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+GUI_DIR = os.path.join(BASE_DIR, "gui")
 PI_100K_FILE = os.path.join(GUI_DIR, "pi_100k.txt")
 PI_10K_FILE = os.path.join(GUI_DIR, "pi_10k.txt")
 
