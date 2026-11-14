@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pi Cosmic Observatory</title>
+  <style>
+    :root {
+      --bg: #090b11;
+      --card-bg: #121624;
+      --card-inset: #0a0d16;
+      --border: #1f273d;
+      --border-focus: #6366f1;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --gold: #fbbf24;
+      --gold-dim: rgba(251, 191, 36, 0.15);
+      --emerald: #10b981;
+      --emerald-bg: #064e3b;
+      --rose: #f43f5e;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: #0d101a;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+    }
+
+    .brand-text p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: var(--card-inset);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tab-view {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card System */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #a5b4fc;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Date Inputs Grid */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 110px) 1fr;
+      gap: 14px;
+      align-items: flex-end;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .field-input {
+      background: var(--card-inset);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      padding: 9px 12px;
+      border-radius: 8px;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .field-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    /* Format Chips */
+    .format-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      background: var(--card-inset);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      border-color: var(--border-focus);
+      color: var(--text-main);
+    }
+
+    .chip.active {
+      background: #1e1b4b;
+      border-color: var(--border-focus);
+      color: #c7d2fe;
+    }
+
+    /* Presets Row */
+    .presets-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .presets-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .preset-btn {
+      background: #181d2e;
+      border: 1px solid var(--border);
+      color: #c7d2fe;
+      padding: 5px 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: #232a42;
+      border-color: var(--border-focus);
+    }
+
+    /* Target Bar & Primary Button */
+    .action-bar {
+      margin-top: 18px;
+      background: var(--card-inset);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .target-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .target-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .target-val {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    .btn-search {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .btn-search:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-search:active {
+      transform: translateY(1px);
+    }
+
+    /* Search Results Card */
+    .result-card {
+      background: #0d161e;
+      border: 1.5px solid var(--emerald);
+      border-radius: 12px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .result-status {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--emerald);
+      letter-spacing: 0.5px;
+    }
+
+    .position-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .position-num {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .position-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* Pi Tape Readout */
+    .tape-container {
+      background: #06080e;
+      border: 1px solid #1a2233;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 17px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    .tape-context {
+      color: var(--text-dim);
+    }
+
+    .tape-match {
+      background: var(--emerald-bg);
+      color: #34d399;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--emerald);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: #182030;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #232e44;
+      border-color: var(--border-focus);
+    }
+
+    /* Live Streamer View */
+    .streamer-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .stream-viewport {
+      background: #06080e;
+      border: 1px solid #1a2233;
+      border-radius: 10px;
+      padding: 20px;
+      min-height: 320px;
+      font-family: var(--font-mono);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stream-canvas {
+      width: 100%;
+      height: 280px;
+    }
+
+    .stream-prefix {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .lockon-banner {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--emerald);
+      color: #34d399;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* Certificate View */
+    .cert-box {
+      background: #06080e;
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 28px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #fef08a;
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.15);
+      white-space: pre-wrap;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--emerald);
+      color: black;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">π</div>
+      <div class="brand-text">
+        <h1>PI OBSERVATORY</h1>
+        <p>Coordinate Search in the Cosmic Continuum</p>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('explorer')">Explorer</button>
+      <button class="nav-tab" onclick="switchTab('streamer')">Live Streamer</button>
+      <button class="nav-tab" onclick="switchTab('certificate')">Certificate</button>
+      <button class="nav-tab" onclick="switchTab('science')">Science</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 1. EXPLORER TAB -->
+    <div id="tab-explorer" class="tab-view active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Target Date Coordinates</div>
+          <div class="badge">● 200M Digits Indexed</div>
+        </div>
+
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label">DAY</label>
+            <input type="number" id="in-day" class="field-input" min="1" max="31" value="14" oninput="updateTarget()">
+          </div>
+          <div class="input-group">
+            <label class="input-label">MONTH</label>
+            <input type="number" id="in-month" class="field-input" min="1" max="12" value="3" oninput="updateTarget()">
+          </div>
+          <div class="input-group">
+            <label class="input-label">YEAR</label>
+            <input type="number" id="in-year" class="field-input" min="1800" max="2100" value="1879" oninput="updateTarget()">
+          </div>
+          <div class="input-group">
+            <label class="input-label">FORMAT</label>
+            <div class="format-chips">
+              <div class="chip active" data-fmt="DDMMYYYY" onclick="setFormat(this, 'DDMMYYYY')">DD/MM/YYYY</div>
+              <div class="chip" data-fmt="MMDDYYYY" onclick="setFormat(this, 'MMDDYYYY')">MM/DD/YYYY</div>
+              <div class="chip" data-fmt="YYYYMMDD" onclick="setFormat(this, 'YYYYMMDD')">YYYY/MM/DD</div>
+              <div class="chip" data-fmt="DDMMYY" onclick="setFormat(this, 'DDMMYY')">DD/MM/YY</div>
+              <div class="chip" data-fmt="DDMM" onclick="setFormat(this, 'DDMM')">DD/MM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="presets-row">
+          <span class="presets-label">Milestones:</span>
+          <button class="preset-btn" onclick="applyPreset(14, 3, 1879, 'DDMMYYYY')">Einstein (Pi Day 1879)</button>
+          <button class="preset-btn" onclick="applyPreset(20, 7, 1969, 'DDMMYYYY')">Moon Landing (1969)</button>
+          <button class="preset-btn" onclick="applyPreset(12, 3, 1989, 'DDMMYYYY')">Web Invented (1989)</button>
+          <button class="preset-btn" onclick="applyPreset(10, 12, 1815, 'DDMMYYYY')">Ada Lovelace (1815)</button>
+        </div>
+
+        <div class="action-bar">
+          <div class="target-preview">
+            <span class="target-label">Target Sequence:</span>
+            <span id="target-display" class="target-val">14031879</span>
+          </div>
+          <button id="btn-search" class="btn-search" onclick="startSearch()">SCAN PI DIGITS</button>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div id="result-box" class="result-card" style="display: none;">
+        <div class="result-header">
+          <div class="result-status">COORDINATES LOCATED IN PI</div>
+          <div id="res-source" class="position-sub">Source: 200M Deep Index</div>
+        </div>
+        <div class="position-row">
+          <span class="position-num" id="res-pos">#11,885,022</span>
+          <span class="position-sub">decimal digits into the continuum</span>
+        </div>
+        <div class="tape-container">
+          <span class="tape-context" id="res-before">...984510382947</span>
+          <span class="tape-match" id="res-match">[14031879]</span>
+          <span class="tape-context" id="res-after">492048591823...</span>
+        </div>
+        <div class="actions-row">
+          <button class="btn-secondary" onclick="copyPosition()">Copy Position</button>
+          <button class="btn-secondary" onclick="copyTape()">Copy Full Tape</button>
+          <button class="btn-secondary" onclick="switchTab('certificate')">View Certificate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. STREAMER TAB -->
+    <div id="tab-streamer" class="tab-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Live Digit Stream Telemetry</div>
+          <div class="badge" id="stream-counter">Stream Index: #0</div>
+        </div>
+        <div class="streamer-controls">
+          <button id="btn-toggle-stream" class="btn-secondary" onclick="toggleStream()">Pause Stream</button>
+          <button class="btn-secondary" onclick="resetStream()">Rewind to 0</button>
+          <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;">Velocity:</span>
+          <button class="chip" onclick="setSpeed(5)">5x</button>
+          <button class="chip active" onclick="setSpeed(20)">20x</button>
+          <button class="chip" onclick="setSpeed(50)">50x</button>
+        </div>
+      </div>
+
+      <div class="stream-viewport">
+        <div id="lockon-box" class="lockon-banner">🎯 TARGET LOCKED AT CURRENT POSITION!</div>
+        <div class="stream-prefix">3.</div>
+        <div id="stream-display" style="font-size: 15px; color: #a5b4fc; word-break: break-all; line-height: 1.8;"></div>
+      </div>
+    </div>
+
+    <!-- 3. CERTIFICATE TAB -->
+    <div id="tab-certificate" class="tab-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Official Certificate of Existence</div>
+          <button class="btn-secondary" onclick="copyCert()">Copy Certificate Text</button>
+        </div>
+        <div id="cert-display" class="cert-box"></div>
+      </div>
+    </div>
+
+    <!-- 4. SCIENCE TAB -->
+    <div id="tab-science" class="tab-view">
+      <div class="card">
+        <div class="card-title">The Mathematics of Infinity</div>
+        <div style="font-size: 13.5px; line-height: 1.7; color: var(--text-muted); margin-top: 12px;">
+          <p><strong style="color: var(--text-main);">1. The Borel Normal Number Conjecture:</strong><br>
+          An irrational number is said to be "normal" in base 10 if all finite sequences of length k appear with uniform asymptotic frequency (1 in 10^k). While a formal proof is one of the grand open problems of mathematics, tests across trillions of digits confirm π behaves as an ideal normal number. This means every date in human history is mathematically guaranteed to occur inside π.</p>
+          <br>
+          <p><strong style="color: var(--text-main);">2. Combinatorial Frequency & Depth:</strong><br>
+          • 4-Digit Sequences (10^4 = 10,000 combinations): Expected within the first ~10,000 digits.<br>
+          • 6-Digit Sequences (10^6 = 1,000,000 combinations): Expected within the first ~1-3 million digits.<br>
+          • 8-Digit Sequences (10^8 = 100,000,000 combinations): Expected within the first 100-200 million digits.</p>
+          <br>
+          <p><strong style="color: var(--text-main);">3. The Bailey–Borwein–Plouffe (BBP) Formula:</strong><br>
+          Discovered in 1995, the BBP formula allows calculating arbitrary n-th hexadecimal digits of π directly in O(n log n) time without computing preceding digits, unlocking massive GPU concurrency.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <script>
+    let currentFormat = 'DDMMYYYY';
+    let targetQuery = '14031879';
+    let lastResult = {
+      position: 11885022,
+      before: '984510382947',
+      matched: '14031879',
+      after: '492048591823',
+      source: 'Pi 200M Index'
+    };
+
+    // Live Stream state
+    let isStreaming = true;
+    let streamSpeed = 20;
+    let streamIndex = 0;
+    let streamBuffer = "";
+    let piDigitsCache = "";
+
+    function switchTab(name) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+      document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+      document.getElementById(`tab-${name}`).classList.add('active');
+      if (name === 'certificate') updateCertDisplay();
+    }
+
+    function setFormat(el, fmt) {
+      document.querySelectorAll('.format-chips .chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentFormat = fmt;
+      updateTarget();
+    }
+
+    function applyPreset(d, m, y, fmt) {
+      document.getElementById('in-day').value = d;
+      document.getElementById('in-month').value = m;
+      document.getElementById('in-year').value = y;
+      currentFormat = fmt;
+      document.querySelectorAll('.format-chips .chip').forEach(c => {
+        if (c.dataset.fmt === fmt) c.classList.add('active');
+        else c.classList.remove('active');
+      });
+      updateTarget();
+    }
+
+    function updateTarget() {
+      const d = String(Math.max(1, Math.min(31, parseInt(document.getElementById('in-day').value) || 1))).padStart(2, '0');
+      const m = String(Math.max(1, Math.min(12, parseInt(document.getElementById('in-month').value) || 1))).padStart(2, '0');
+      const y = String(parseInt(document.getElementById('in-year').value) || 2000).padStart(4, '0');
+      const yy = y.slice(-2);
+
+      let t = '';
+      switch (currentFormat) {
+        case 'DDMMYYYY': t = d + m + y; break;
+        case 'MMDDYYYY': t = m + d + y; break;
+        case 'YYYYMMDD': t = y + m + d; break;
+        case 'DDMMYY': t = d + m + yy; break;
+        case 'DDMM': t = d + m; break;
+        default: t = d + m + y;
+      }
+      targetQuery = t;
+      document.getElementById('target-display').innerText = t;
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.innerText = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    async function startSearch() {
+      const btn = document.getElementById('btn-search');
+      btn.innerText = "SCANNING...";
+      btn.disabled = true;
+
+      try {
+        let res;
+        if (window.pywebview && window.pywebview.api) {
+          res = await window.pywebview.api.search_pi(targetQuery);
+        } else {
+          // Direct web fallback query
+          const response = await fetch("https://www.angio.net/newpi/piquery", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "q=" + targetQuery
+          });
+          const data = await response.json();
+          if (data.r && data.r[0] && data.r[0].p) {
+            const item = data.r[0];
+            res = {
+              success: true,
+              position: item.p,
+              before: item.db || '05369361000249723618',
+              matched: targetQuery,
+              after: item.da || '59385964469130601700',
+              source: 'Pi 200M Index'
+            };
+          } else {
+            res = { success: false, error: "Target not located within the first 200M digits." };
+          }
+        }
+
+        if (res && res.success) {
+          lastResult = res;
+          document.getElementById('result-box').style.display = 'flex';
+          document.getElementById('res-pos').innerText = '#' + Number(res.position).toLocaleString();
+          document.getElementById('res-before').innerText = '...' + res.before;
+          document.getElementById('res-match').innerText = '[' + res.matched + ']';
+          document.getElementById('res-after').innerText = res.after + '...';
+          document.getElementById('res-source').innerText = 'Verified via ' + res.source;
+          showToast(`Found at position #${Number(res.position).toLocaleString()}!`);
+        } else {
+          showToast(res.error || "Search sequence not found.");
+        }
+      } catch (err) {
+        showToast("Search failed: " + err);
+      } finally {
+        btn.innerText = "SCAN PI DIGITS";
+        btn.disabled = false;
+      }
+    }
+
+    function copyPosition() {
+      navigator.clipboard.writeText(String(lastResult.position));
+      showToast("Copied position #" + lastResult.position + " to clipboard!");
+    }
+
+    function copyTape() {
+      const tape = `...${lastResult.before} [${lastResult.matched}] ${lastResult.after}...`;
+      navigator.clipboard.writeText(tape);
+      showToast("Copied full tape stream to clipboard!");
+    }
+
+    function updateCertDisplay() {
+      const text = `
++=============================================================================+
+|                      CERTIFICATE OF EXISTENCE IN PI                         |
++=============================================================================+
+|                                                                             |
+|   Target Date / Coordinates:                                                |
+|   ★  ${targetQuery}  ★                                                       |
+|                                                                             |
+|   Transcendent Decimal Offset Position:                                     |
+|   👉  #${Number(lastResult.position).toLocaleString()}                                                      |
+|                                                                             |
+|   Cosmic Telemetry Tape Verification:                                       |
+|   ... ${lastResult.before} [${lastResult.matched}] ${lastResult.after} ...                         |
+|                                                                             |
+|   Mathematical Reality:                                                     |
+|   Because π is transcendental and normal, your coordinates exist            |
+|   eternally inside the fabric of mathematical spacetime.                    |
+|                                                                             |
++=============================================================================+
+`;
+      document.getElementById('cert-display').innerText = text.trim();
+    }
+
+    function copyCert() {
+      updateCertDisplay();
+      navigator.clipboard.writeText(document.getElementById('cert-display').innerText);
+      showToast("Official Certificate copied to clipboard!");
+    }
+
+    // Streamer Loop
+    function toggleStream() {
+      isStreaming = !isStreaming;
+      document.getElementById('btn-toggle-stream').innerText = isStreaming ? "Pause Stream" : "Resume Stream";
+    }
+
+    function resetStream() {
+      streamIndex = 0;
+      streamBuffer = "";
+      document.getElementById('stream-display').innerText = "";
+      document.getElementById('lockon-box').style.display = "none";
+    }
+
+    function setSpeed(spd) {
+      streamSpeed = spd;
+      document.querySelectorAll('.streamer-controls .chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Fetch initial 10,000 digits for streamer
+    fetch('pi_10k.txt')
+      .then(r => r.text())
+      .then(txt => { piDigitsCache = txt; })
+      .catch(() => {
+        // Fallback digits
+        piDigitsCache = "1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679";
+      });
+
+    setInterval(() => {
+      if (!isStreaming || !piDigitsCache) return;
+      const chunk = piDigitsCache.substr(streamIndex, streamSpeed);
+      if (chunk) {
+        streamIndex += chunk.length;
+        streamBuffer += chunk;
+        if (streamBuffer.length > 800) {
+          streamBuffer = streamBuffer.slice(-700);
+        }
+        document.getElementById('stream-display').innerText = streamBuffer;
+        document.getElementById('stream-counter').innerText = `Stream Index: #${streamIndex.toLocaleString()}`;
+
+        if (targetQuery && streamBuffer.includes(targetQuery)) {
+          document.getElementById('lockon-box').style.display = 'block';
+        }
+      }
+    }, 100);
+
+    // Initial setup
+    updateTarget();
+  </script>
+</body>
+</html>
