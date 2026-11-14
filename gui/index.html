@@ -3,28 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pi Cosmic Observatory - Date Locator</title>
+  <title>Pi Date Search</title>
   <style>
     :root {
-      --bg: #07090e;
-      --card-bg: #0f1422;
-      --card-inner: #090c15;
-      --border: #1c2438;
-      --border-bright: #2e3b5b;
-      --border-focus: #3b82f6;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --accent-glow: rgba(59, 130, 246, 0.25);
-      --gold: #f59e0b;
-      --gold-glow: rgba(245, 158, 11, 0.2);
-      --emerald: #10b981;
-      --emerald-glow: rgba(16, 185, 129, 0.25);
-      --cyan: #06b6d4;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      --bg: #0c0e14;
+      --surface: #141822;
+      --surface-subtle: #0f121a;
+      --border: #202636;
+      --border-hover: #313a52;
+      --border-focus: #4b5d82;
+      --text: #e2e8f0;
+      --text-muted: #8b97ab;
+      --text-dim: #546075;
+      --accent: #334e68;
+      --accent-hover: #3e5e7e;
+      --highlight-bg: #222d3d;
+      --highlight-border: #485c7b;
+      --highlight-text: #f8fafc;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Consolas, Menlo, monospace;
     }
 
     * {
@@ -35,1134 +32,552 @@
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      height: 100vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Scrollbars */
-    ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
-    }
-    ::-webkit-scrollbar-track {
       background: var(--bg);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1e283d;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #2e3c5a;
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px 48px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Top Masthead */
+    .container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header */
     header {
-      background: #090d17;
-      border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-shrink: 0;
-      z-index: 20;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand-icon {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: var(--gold);
+    h1 {
       font-size: 20px;
-      font-weight: 800;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      box-shadow: 0 0 12px var(--gold-glow);
-    }
-
-    .brand-text h1 {
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .brand-text p {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-
-    .live-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 2px 8px;
-      border-radius: 12px;
-      letter-spacing: 0.5px;
-    }
-
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--emerald);
-      animation: pulse 1.6s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .masthead-tools {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .tool-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
       font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
+      letter-spacing: -0.2px;
+      color: var(--text);
     }
 
-    .tool-btn:hover {
-      background: #192033;
-      color: var(--text-main);
-      border-color: var(--border-bright);
+    .subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
     }
 
-    .tool-btn.active {
-      color: var(--emerald);
-      border-color: var(--emerald);
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    /* Main Container */
-    main {
-      flex: 1;
-      padding: 20px 24px 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      max-width: 1280px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* Card Layouts */
-    .section-card {
-      background: var(--card-bg);
+    .status-tag {
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      background: var(--surface-subtle);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 22px;
-      position: relative;
-    }
-
-    /* Live Digits Console Viewport */
-    .stream-card {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      border-color: #242f47;
-      background: linear-gradient(180deg, #0e1320 0%, #0a0d16 100%);
-    }
-
-    .stream-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      border-bottom: 1px solid #192236;
-      padding-bottom: 10px;
-    }
-
-    .stream-title-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .stream-title {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #93c5fd;
-    }
-
-    .offset-counter {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      background: #080c14;
-      border: 1px solid #1c263c;
-      padding: 3px 10px;
+      padding: 3px 9px;
       border-radius: 4px;
-      color: var(--gold);
     }
 
-    .stream-controls-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
     }
 
-    .btn-stream {
-      background: #161e30;
-      border: 1px solid #283550;
-      color: var(--text-main);
-      padding: 5px 12px;
-      font-size: 11.5px;
-      font-weight: 600;
-      border-radius: 5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.15s ease;
-    }
-
-    .btn-stream:hover {
-      background: #202b44;
-      border-color: #3b4d75;
-    }
-
-    .speed-pills {
-      display: flex;
-      background: #090d16;
-      border: 1px solid #1b2438;
-      border-radius: 6px;
-      padding: 2px;
-      gap: 2px;
-    }
-
-    .speed-pill {
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .speed-pill:hover {
-      color: var(--text-main);
-    }
-
-    .speed-pill.active {
-      background: #1e293b;
-      color: var(--cyan);
-    }
-
-    /* Phosphor Digits Terminal Viewport */
-    .stream-viewport-outer {
-      position: relative;
-      background: #05070c;
-      border: 1px solid #192236;
-      border-radius: 8px;
-      overflow: hidden;
-      min-height: 180px;
-      max-height: 220px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
-    }
-
-    /* Scanning beam animation across digits */
-    .scan-beam {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.8) 50%, transparent 100%);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    .scan-beam.scanning {
-      opacity: 1;
-      animation: scanSweep 1.2s infinite linear;
-    }
-
-    @keyframes scanSweep {
-      0% { top: 0%; }
-      100% { top: 100%; }
-    }
-
-    .viewport-prefix-bar {
-      background: #090d17;
-      border-bottom: 1px solid #141b2a;
-      padding: 6px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      color: var(--text-dim);
-    }
-
-    .prefix-val {
-      color: var(--gold);
-      font-weight: 800;
-      font-size: 14px;
-    }
-
-    .stream-viewport-inner {
-      padding: 14px;
-      overflow-y: auto;
-      font-family: var(--font-mono);
-      font-size: 15px;
-      line-height: 1.85;
-      letter-spacing: 3px;
-      word-break: break-all;
-      color: #cbd5e1;
-      position: relative;
-      flex: 1;
-    }
-
-    /* High-tech digit spans */
-    .pi-digit {
-      display: inline-block;
-      cursor: crosshair;
-      border-radius: 2px;
-      transition: background 0.1s, color 0.1s;
-      padding: 0 1px;
-    }
-
-    .pi-digit:hover {
-      background: rgba(245, 158, 11, 0.3);
-      color: var(--gold);
-      font-weight: 800;
-    }
-
-    .pi-digit.active-scan {
-      background: rgba(6, 182, 212, 0.25);
-      color: #67e8f9;
-    }
-
-    .pi-digit.match-bracket {
-      color: var(--emerald);
-      font-weight: 800;
-    }
-
-    .pi-digit.match-hit {
-      background: #064e3b;
-      color: #34d399;
-      font-weight: 800;
-      border-top: 1px solid var(--emerald);
-      border-bottom: 1px solid var(--emerald);
-      box-shadow: 0 0 12px var(--emerald-glow);
-    }
-
-    /* Live Scrubber */
-    .stream-scrub-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 2px;
-    }
-
-    .scrub-label {
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      color: var(--text-dim);
-      white-space: nowrap;
-    }
-
-    .scrub-slider {
-      flex: 1;
-      height: 4px;
-      appearance: none;
-      background: #182238;
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .scrub-slider::-webkit-slider-thumb {
-      appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 2px solid #ffffff;
-      cursor: ew-resize;
-      box-shadow: 0 0 6px var(--accent-glow);
-    }
-
-    /* DATE SEARCH CONTROLLER */
-    .control-card {
+    /* Input Section */
+    .input-form {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
-    .control-header {
+    .form-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .control-title {
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: #cbd5e1;
-    }
-
-    .control-inputs-row {
-      display: grid;
-      grid-template-columns: repeat(3, 110px) 1fr auto;
-      gap: 14px;
+      gap: 12px;
       align-items: flex-end;
+      flex-wrap: wrap;
     }
 
-    @media (max-width: 860px) {
-      .control-inputs-row {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      .format-group {
-        grid-column: span 3;
-      }
-      .btn-search-group {
-        grid-column: span 3;
-      }
-    }
-
-    .field-group {
+    .field {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      flex: 1;
+      min-width: 90px;
     }
 
-    .field-label {
-      font-size: 10.5px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
+    .field-year {
+      flex: 1.4;
+      min-width: 110px;
+    }
+
+    .field-format {
+      flex: 1.6;
+      min-width: 140px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
       color: var(--text-dim);
     }
 
-    .field-box {
-      background: var(--card-inner);
+    input, select {
+      background: var(--surface-subtle);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-main);
+      color: var(--text);
       font-family: var(--font-mono);
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 15px;
       padding: 9px 12px;
-      text-align: center;
-      outline: none;
-      transition: all 0.15s ease;
-    }
-
-    .field-box:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px var(--accent-glow);
-      background: #0d1220;
-    }
-
-    .format-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .fmt-pill {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 6px 11px;
       border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--border-focus);
+    }
+
+    select {
+      font-family: var(--font-sans);
+      font-size: 13px;
       cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .fmt-pill:hover {
-      color: var(--text-main);
-      border-color: var(--border-bright);
-    }
-
-    .fmt-pill.active {
-      background: #172554;
-      border-color: #3b82f6;
-      color: #93c5fd;
     }
 
     .btn-search {
-      background: #2563eb;
+      background: var(--accent);
+      border: 1px solid var(--border-hover);
       color: #ffffff;
-      border: none;
       font-family: var(--font-sans);
       font-size: 13.5px;
-      font-weight: 700;
-      padding: 10px 24px;
-      border-radius: 8px;
+      font-weight: 600;
+      padding: 9px 24px;
+      border-radius: 6px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 42px;
-      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
-      transition: all 0.15s ease;
+      transition: background 0.15s, border-color 0.15s;
+      height: 40px;
       white-space: nowrap;
     }
 
     .btn-search:hover {
-      background: #1d4ed8;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
-      transform: translateY(-1px);
+      background: var(--accent-hover);
+      border-color: var(--border-focus);
     }
 
     .btn-search:active {
       transform: translateY(1px);
     }
 
-    /* Target Bar & Historical Landmarks */
-    .meta-bar {
+    .btn-search:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Sub-row: query preview & examples */
+    .helper-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      background: #090d16;
-      border: 1px solid #1a2236;
-      border-radius: 8px;
-      padding: 10px 14px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .target-preview {
-      display: flex;
       align-items: center;
-      gap: 8px;
       font-size: 12px;
+      color: var(--text-dim);
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .target-val {
-      font-family: var(--font-mono);
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--gold);
-      letter-spacing: 1.5px;
-    }
-
-    .presets-group {
+    .query-preview {
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
     }
 
-    .preset-chip {
-      background: #121829;
-      border: 1px solid #202b44;
-      color: #94a3b8;
-      font-size: 11px;
+    .query-val {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .examples {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .example-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.15s;
+      padding: 0;
+    }
+
+    .example-btn:hover {
+      color: var(--text);
+    }
+
+    /* Stream Section */
+    .stream-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stream-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stream-label {
+      font-size: 12px;
       font-weight: 600;
-      padding: 4px 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.2px;
+    }
+
+    .stream-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-control {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px;
       border-radius: 5px;
+      font-size: 11.5px;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
     }
 
-    .preset-chip:hover {
-      background: #1b243d;
-      color: #f1f5f9;
-      border-color: #3b82f6;
+    .btn-control:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border-hover);
     }
 
-    /* LOCATED RESULT TELEMETRY HUD */
-    .result-hud {
+    .stream-window {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 140px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.8;
+      letter-spacing: 2px;
+      word-break: break-all;
+      color: var(--text-muted);
+    }
+
+    .prefix-pi {
+      color: var(--text);
+      font-weight: 600;
+      margin-right: 2px;
+    }
+
+    .match-highlight {
+      background: var(--highlight-bg);
+      border: 1px solid var(--highlight-border);
+      color: var(--highlight-text);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* Result Card */
+    .result-card {
       display: none;
-      background: #091216;
-      border: 1.5px solid var(--emerald);
-      border-radius: 12px;
-      padding: 20px;
       flex-direction: column;
       gap: 14px;
-      animation: slideInUp 0.25s ease-out;
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.12);
+      background: var(--surface);
+      border: 1px solid var(--border-focus);
+      animation: fadeIn 0.2s ease-out;
     }
 
-    @keyframes slideInUp {
-      from { opacity: 0; transform: translateY(8px); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .result-hud-header {
+    .result-title-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .result-hud-status {
-      display: flex;
       align-items: center;
-      gap: 8px;
-      color: var(--emerald);
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
     }
 
-    .result-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-    }
-
-    .stat-tile {
-      background: #06090f;
-      border: 1px solid #16242b;
-      border-radius: 8px;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .stat-label {
-      font-size: 10.5px;
-      font-weight: 700;
+    .result-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #64748b;
     }
 
-    .stat-value {
+    .result-main {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .position-number {
       font-family: var(--font-mono);
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--gold);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.5px;
     }
 
-    .stat-sub {
-      font-size: 11px;
-      color: #94a3b8;
+    .position-label {
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    /* Context Tape Readout */
     .tape-box {
-      background: #05080e;
-      border: 1px solid #14282e;
-      border-radius: 8px;
-      padding: 14px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
       font-family: var(--font-mono);
-      font-size: 16px;
-      line-height: 1.6;
+      font-size: 13.5px;
+      color: var(--text-dim);
       word-break: break-all;
-      letter-spacing: 1px;
+      line-height: 1.6;
     }
 
-    .tape-dim {
-      color: #475569;
-    }
-
-    .tape-highlight {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid var(--emerald);
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+    .tape-box .match {
+      color: var(--text);
+      font-weight: 600;
+      background: var(--highlight-bg);
+      border: 1px solid var(--highlight-border);
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin: 0 2px;
     }
 
     .result-actions {
       display: flex;
       align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
-    .btn-action {
-      background: #111a26;
-      border: 1px solid #23344d;
-      color: var(--text-main);
-      padding: 7px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s;
-    }
-
-    .btn-action:hover {
-      background: #1a273b;
-      border-color: #385175;
-    }
-
-    .btn-action-primary {
-      background: var(--emerald);
-      border-color: var(--emerald);
-      color: #03130d;
-      font-weight: 700;
-    }
-
-    .btn-action-primary:hover {
-      background: #059669;
-      color: #ffffff;
-    }
-
-    /* Modal Sheet for Certificate */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(3, 5, 8, 0.85);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 20px;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #0c101c;
-      border: 1.5px solid var(--border-bright);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 680px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-      animation: modalZoom 0.2s ease-out;
-    }
-
-    @keyframes modalZoom {
-      from { opacity: 0; transform: scale(0.96); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .cert-tape {
-      background: #05070d;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      padding: 20px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 1.6;
-      color: #fef08a;
-      white-space: pre-wrap;
-      box-shadow: inset 0 0 15px rgba(245, 158, 11, 0.1);
-    }
-
-    /* Toast Notification */
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #10b981;
-      color: #022013;
-      font-weight: 700;
+      background: var(--surface);
+      border: 1px solid var(--border-focus);
+      color: var(--text);
       font-size: 12.5px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-      transform: translateY(80px);
+      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: 6px;
       opacity: 0;
-      transition: all 0.25s ease;
-      z-index: 200;
+      transform: translateY(12px);
+      transition: all 0.2s ease;
       pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
 
     .toast.show {
-      transform: translateY(0);
       opacity: 1;
-    }
-
-    /* Tooltip */
-    #digit-tooltip {
-      position: fixed;
-      pointer-events: none;
-      background: #1e293b;
-      color: #f8fafc;
-      border: 1px solid #334155;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      z-index: 90;
-      display: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transform: translateY(0);
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Masthead Bar -->
-  <header>
-    <div class="brand">
-      <div class="brand-icon">π</div>
-      <div class="brand-text">
-        <h1>
-          PI OBSERVATORY
-          <span class="live-indicator"><span class="live-dot"></span> STREAM ACTIVE</span>
-        </h1>
-        <p>250,000 MEMORY DIGITS • 200,000,000 CONTINUUM INDEX</p>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-row">
+        <h1>Pi Date Search</h1>
+        <span id="index-stat" class="status-tag">250,000 local · 200M indexed</span>
+      </div>
+      <p class="subtitle">Find the exact decimal position of any date within the digits of π.</p>
+    </header>
+
+    <!-- Date Input Form -->
+    <div class="card">
+      <div class="input-form">
+        <div class="form-row">
+          <div class="field">
+            <label for="in-day">Day</label>
+            <input type="number" id="in-day" min="1" max="31" value="14" oninput="updateTarget()" onkeydown="handleKey(event)">
+          </div>
+          <div class="field">
+            <label for="in-month">Month</label>
+            <input type="number" id="in-month" min="1" max="12" value="3" oninput="updateTarget()" onkeydown="handleKey(event)">
+          </div>
+          <div class="field field-year">
+            <label for="in-year">Year</label>
+            <input type="number" id="in-year" min="1800" max="2100" value="1879" oninput="updateTarget()" onkeydown="handleKey(event)">
+          </div>
+          <div class="field field-format">
+            <label for="in-format">Format</label>
+            <select id="in-format" onchange="updateTarget()">
+              <option value="DDMMYYYY" selected>DD/MM/YYYY</option>
+              <option value="MMDDYYYY">MM/DD/YYYY</option>
+              <option value="YYYYMMDD">YYYY/MM/DD</option>
+              <option value="DDMMYY">DD/MM/YY</option>
+              <option value="DDMM">DD/MM</option>
+            </select>
+          </div>
+          <button id="btn-search" class="btn-search" onclick="runSearch()">Search</button>
+        </div>
+
+        <div class="helper-row">
+          <div class="query-preview">
+            <span>Query:</span>
+            <span id="query-display" class="query-val">14031879</span>
+          </div>
+          <div class="examples">
+            <span>Examples:</span>
+            <button class="example-btn" onclick="setPreset(14, 3, 1879, 'DDMMYYYY')">Pi Day 1879</button>
+            <span>·</span>
+            <button class="example-btn" onclick="setPreset(20, 7, 1969, 'DDMMYYYY')">Apollo 11</button>
+            <span>·</span>
+            <button class="example-btn" onclick="setPreset(12, 3, 1989, 'DDMMYYYY')">Web 1989</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="masthead-tools">
-      <button id="btn-sound" class="tool-btn active" onclick="toggleSound()">
-        <span id="sound-icon">🔊</span> AUDIO FX
-      </button>
-      <button class="tool-btn" onclick="openCertModal()">
-        📜 CERTIFICATE
-      </button>
-      <button class="tool-btn" onclick="toggleFullscreen()">
-        ⛶ FULLSCREEN
-      </button>
-    </div>
-  </header>
 
-  <main>
-    <!-- HERO SECTION: LIVE DIGIT MATRIX & CONTINUOUS PHOSPHOR STREAM -->
-    <div class="section-card stream-card">
+    <!-- Live Digits Stream -->
+    <div class="card stream-card">
       <div class="stream-header">
-        <div class="stream-title-group">
-          <span class="stream-title">Live Digit Stream Telemetry</span>
-          <span id="offset-counter" class="offset-counter">OFFSET: #000,001</span>
-          <span id="stream-status" style="font-size: 11px; color: var(--emerald); font-weight: 700;">● STREAMING (40 d/s)</span>
-        </div>
-        <div class="stream-controls-group">
-          <button id="btn-toggle-stream" class="btn-stream" onclick="toggleStream()">
-            <span id="stream-icon">⏸</span> Pause
-          </button>
-          <button class="btn-stream" onclick="rewindStream()">
-            ⏮ Rewind
-          </button>
-          <div class="speed-pills">
-            <button class="speed-pill" onclick="setSpeed(5, this)">5x</button>
-            <button class="speed-pill" onclick="setSpeed(15, this)">15x</button>
-            <button class="speed-pill active" onclick="setSpeed(40, this)">40x</button>
-            <button class="speed-pill" onclick="setSpeed(100, this)">100x</button>
-          </div>
+        <span class="stream-label">Digits of π</span>
+        <div class="stream-controls">
+          <span id="offset-indicator" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-right: 6px;">Offset: 1</span>
+          <button id="btn-stream" class="btn-control" onclick="toggleStream()">Pause</button>
+          <button class="btn-control" onclick="resetStream()">Reset</button>
         </div>
       </div>
-
-      <!-- Main Live Digits Viewport -->
-      <div class="stream-viewport-outer">
-        <div id="scan-beam" class="scan-beam"></div>
-        <div class="viewport-prefix-bar">
-          <div><span class="prefix-val">π = 3.</span> <span id="viewport-subinfo" style="color: var(--text-dim); margin-left: 6px;">Hover any digit for exact coordinate index</span></div>
-          <div id="warp-stat" style="font-size: 11px; color: var(--cyan); font-weight: 700;">ACTIVE CONTINUUM</div>
-        </div>
-        <div id="stream-viewport" class="stream-viewport-inner"></div>
-      </div>
-
-      <!-- Interactive Scrubber -->
-      <div class="stream-scrub-row">
-        <span class="scrub-label">SCRUB POSITION:</span>
-        <input type="range" id="stream-scrubber" class="scrub-slider" min="0" max="249000" value="0" oninput="onScrub(this.value)">
-        <span id="scrub-indicator" class="scrub-label" style="color: var(--gold);">#1 / 250,000</span>
+      <div id="stream-box" class="stream-window">
+        <span class="prefix-pi">3.</span><span id="stream-content">Loading digits...</span>
       </div>
     </div>
 
-    <!-- DATE COORDINATE LOCATOR DECK -->
-    <div class="section-card control-card">
-      <div class="control-header">
-        <span class="control-title">Date Coordinate Locator</span>
-        <span style="font-size: 11.5px; color: var(--text-dim);">Enter your birthday to track its eternal decimal address in π</span>
+    <!-- Result Box -->
+    <div id="result-card" class="card result-card">
+      <div class="result-title-row">
+        <span class="result-title">Result Found</span>
+        <span id="result-source" style="font-size: 11.5px; color: var(--text-dim); font-family: var(--font-mono);">200M Index</span>
       </div>
 
-      <div class="control-inputs-row">
-        <div class="field-group">
-          <label class="field-label">DAY</label>
-          <input type="number" id="in-day" class="field-box" min="1" max="31" value="14" oninput="onDateInput()" onkeydown="handleEnter(event)">
-        </div>
-        <div class="field-group">
-          <label class="field-label">MONTH</label>
-          <input type="number" id="in-month" class="field-box" min="1" max="12" value="3" oninput="onDateInput()" onkeydown="handleEnter(event)">
-        </div>
-        <div class="field-group">
-          <label class="field-label">YEAR</label>
-          <input type="number" id="in-year" class="field-box" min="1800" max="2100" value="1879" oninput="onDateInput()" onkeydown="handleEnter(event)">
-        </div>
-        <div class="field-group format-group">
-          <label class="field-label">FORMAT</label>
-          <div class="format-pills">
-            <button class="fmt-pill active" data-fmt="DDMMYYYY" onclick="setFormat('DDMMYYYY', this)">DD/MM/YYYY</button>
-            <button class="fmt-pill" data-fmt="MMDDYYYY" onclick="setFormat('MMDDYYYY', this)">MM/DD/YYYY</button>
-            <button class="fmt-pill" data-fmt="YYYYMMDD" onclick="setFormat('YYYYMMDD', this)">YYYY/MM/DD</button>
-            <button class="fmt-pill" data-fmt="DDMMYY" onclick="setFormat('DDMMYY', this)">DD/MM/YY</button>
-            <button class="fmt-pill" data-fmt="DDMM" onclick="setFormat('DDMM', this)">DD/MM</button>
-          </div>
-        </div>
-        <div class="field-group btn-search-group">
-          <label class="field-label" style="opacity: 0;">ACTION</label>
-          <button id="btn-scan" class="btn-search" onclick="executeScan()">
-            <span id="scan-btn-icon">⚡</span> SCAN PI DIGITS
-          </button>
-        </div>
-      </div>
-
-      <!-- Historical Landmarks & Target Sequence -->
-      <div class="meta-bar">
-        <div class="target-preview">
-          <span style="color: var(--text-muted); font-weight: 600;">Target Sequence:</span>
-          <span id="target-display" class="target-val">14031879</span>
-        </div>
-
-        <div class="presets-group">
-          <span style="font-size: 11px; color: var(--text-dim); font-weight: 700; margin-right: 4px;">Milestones:</span>
-          <button class="preset-chip" onclick="applyPreset(14, 3, 1879, 'DDMMYYYY')">Einstein (Pi Day 1879)</button>
-          <button class="preset-chip" onclick="applyPreset(20, 7, 1969, 'DDMMYYYY')">Apollo 11 (1969)</button>
-          <button class="preset-chip" onclick="applyPreset(12, 3, 1989, 'DDMMYYYY')">World Wide Web (1989)</button>
-          <button class="preset-chip" onclick="applyPreset(10, 12, 1815, 'DDMMYYYY')">Ada Lovelace (1815)</button>
-          <button class="preset-chip" onclick="applyPreset(22, 12, 1887, 'DDMMYYYY')">Ramanujan (1887)</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- LOCATED RESULT HUD (Appears dynamically upon finding coordinates) -->
-    <div id="result-hud" class="result-hud">
-      <div class="result-hud-header">
-        <div class="result-hud-status">
-          <span>🎯</span>
-          <span>COORDINATES LOCATED IN THE PI CONTINUUM</span>
-        </div>
-        <div id="res-engine-tag" style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">Verified via 200M Deep Continuum Index</div>
-      </div>
-
-      <div class="result-stats-grid">
-        <div class="stat-tile">
-          <span class="stat-label">DECIMAL OFFSET</span>
-          <span id="res-offset" class="stat-value">#11,885,022</span>
-          <span class="stat-sub">digits after decimal point</span>
-        </div>
-        <div class="stat-tile">
-          <span class="stat-label">SCAN ENGINE / LATENCY</span>
-          <span id="res-latency" class="stat-value" style="color: var(--cyan);">42 ms</span>
-          <span id="res-source-sub" class="stat-sub">High-speed verification</span>
-        </div>
-        <div class="stat-tile">
-          <span class="stat-label">MATHEMATICAL PROBABILITY</span>
-          <span id="res-prob" class="stat-value" style="color: #cbd5e1;">1 in 100M</span>
-          <span class="stat-sub">Borel normal distribution</span>
-        </div>
+      <div class="result-main">
+        <span id="result-pos" class="position-number">11,885,022</span>
+        <span class="position-label">digits into π</span>
       </div>
 
       <div class="tape-box">
-        <span class="tape-dim">...</span><span id="tape-before" class="tape-dim">984510382947</span>
-        <span id="tape-match" class="tape-highlight">[ 14031879 ]</span>
-        <span id="tape-after" class="tape-dim">492048591823</span><span class="tape-dim">...</span>
+        <span id="tape-before">...984510382947</span>
+        <span id="tape-matched" class="match">14031879</span>
+        <span id="tape-after">492048591823...</span>
       </div>
 
       <div class="result-actions">
-        <button class="btn-action btn-action-primary" onclick="jumpStreamToResult()">
-          🎯 Jump To Coordinate In Stream
-        </button>
-        <button class="btn-action" onclick="copyPosition()">
-          📋 Copy Position
-        </button>
-        <button class="btn-action" onclick="copyFullTape()">
-          🎞 Copy Context Tape
-        </button>
-        <button class="btn-action" onclick="openCertModal()">
-          📜 Official Certificate
-        </button>
-      </div>
-    </div>
-  </main>
-
-  <!-- MODAL: CERTIFICATE OF EXISTENCE -->
-  <div id="cert-modal" class="modal-backdrop" onclick="closeCertOnBackdrop(event)">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 14px; font-weight: 800; color: var(--gold); letter-spacing: 0.5px;">CERTIFICATE OF EXISTENCE IN PI</span>
-        <button class="tool-btn" onclick="closeCertModal()">✕ CLOSE</button>
-      </div>
-      <div id="cert-text" class="cert-tape"></div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="btn-action btn-action-primary" onclick="copyCertificate()">📋 Copy Certificate Text</button>
+        <button class="btn-control" onclick="copyPosition()">Copy position</button>
+        <button class="btn-control" onclick="copyContext()">Copy sequence</button>
       </div>
     </div>
   </div>
 
-  <!-- FLOATING TOOLTIP FOR DIGITS -->
-  <div id="digit-tooltip"></div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="toast">Action completed</div>
+  <div id="toast" class="toast">Copied to clipboard</div>
 
   <script>
-    // Audio Synthesizer (Web Audio API - zero dependencies, offline)
-    let audioCtx = null;
-    let soundEnabled = true;
-
-    function initAudio() {
-      if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtx = new AudioContext();
-      }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    function playTick() {
-      if (!soundEnabled) return;
-      try {
-        initAudio();
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(880 + Math.random() * 200, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.03);
-      } catch (e) {}
-    }
-
-    function playLockChime() {
-      if (!soundEnabled) return;
-      try {
-        initAudio();
-        if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
-          gain.gain.setValueAtTime(0.06, now + idx * 0.06);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.06 + 0.35);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + idx * 0.06);
-          osc.stop(now + idx * 0.06 + 0.35);
-        });
-      } catch (e) {}
-    }
-
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      document.getElementById('btn-sound').classList.toggle('active', soundEnabled);
-      document.getElementById('sound-icon').innerText = soundEnabled ? '🔊' : '🔇';
-      showToast(soundEnabled ? 'Audio FX enabled' : 'Audio FX muted');
-    }
-
-    // State Variables
-    let currentFormat = 'DDMMYYYY';
     let targetQuery = '14031879';
-    let piDigitsCache = "";
+    let piDigits = '';
     let streamIndex = 0;
-    let streamSpeed = 40; // digits per second / batch
     let isStreaming = true;
-    let streamInterval = null;
-    let isHyperscan = false;
+    let streamTimer = null;
 
-    let lastResult = {
+    let currentResult = {
       position: 11885022,
       before: '984510382947',
       matched: '14031879',
       after: '492048591823',
-      source: 'Pi 200M Deep Continuum Index',
-      latency_ms: 42,
-      in_local: false
+      source: 'Pi 200M Index'
     };
 
-    // Tooltip handler
-    const tooltip = document.getElementById('digit-tooltip');
-    function showDigitTooltip(e, digit, offset) {
-      tooltip.innerText = `Digit #${offset.toLocaleString()}: '${digit}'`;
-      tooltip.style.left = (e.clientX + 10) + 'px';
-      tooltip.style.top = (e.clientY + 15) + 'px';
-      tooltip.style.display = 'block';
+    function updateTarget() {
+      const d = String(Math.max(1, Math.min(31, parseInt(document.getElementById('in-day').value) || 1))).padStart(2, '0');
+      const m = String(Math.max(1, Math.min(12, parseInt(document.getElementById('in-month').value) || 1))).padStart(2, '0');
+      const y = String(parseInt(document.getElementById('in-year').value) || 2000).padStart(4, '0');
+      const fmt = document.getElementById('in-format').value;
+
+      let q = '';
+      if (fmt === 'DDMMYYYY') q = d + m + y;
+      else if (fmt === 'MMDDYYYY') q = m + d + y;
+      else if (fmt === 'YYYYMMDD') q = y + m + d;
+      else if (fmt === 'DDMMYY') q = d + m + y.slice(-2);
+      else if (fmt === 'DDMM') q = d + m;
+      else q = d + m + y;
+
+      targetQuery = q;
+      document.getElementById('query-display').innerText = q;
     }
 
-    function hideDigitTooltip() {
-      tooltip.style.display = 'none';
+    function setPreset(d, m, y, fmt) {
+      document.getElementById('in-day').value = d;
+      document.getElementById('in-month').value = m;
+      document.getElementById('in-year').value = y;
+      document.getElementById('in-format').value = fmt;
+      updateTarget();
     }
 
-    function copyDigitIndex(offset, digit) {
-      navigator.clipboard.writeText(String(offset));
-      showToast(`Copied decimal index #${offset.toLocaleString()} ('${digit}')`);
-      playTick();
+    function handleKey(e) {
+      if (e.key === 'Enter') runSearch();
     }
 
-    // Load initial Pi digits buffer
-    async function loadPiDigits() {
-      // 1. Try PyWebView API first
+    // Load Pi Digits
+    async function initDigits() {
       if (window.pywebview && window.pywebview.api && window.pywebview.api.get_local_digits) {
         try {
           const res = await window.pywebview.api.get_local_digits(250000);
-          if (res && res.length > 1000) {
-            piDigitsCache = res;
-            initStream();
+          if (res && res.length > 500) {
+            piDigits = res;
+            startStreaming();
             return;
           }
         } catch (e) {}
       }
 
-      // 2. Fetch local file
       try {
         const resp = await fetch('pi_100k.txt');
         if (resp.ok) {
-          piDigitsCache = await resp.text();
-          initStream();
+          piDigits = await resp.text();
+          startStreaming();
           return;
         }
       } catch (e) {}
@@ -1170,190 +585,79 @@
       try {
         const resp2 = await fetch('pi_10k.txt');
         if (resp2.ok) {
-          piDigitsCache = await resp2.text();
-          initStream();
+          piDigits = await resp2.text();
+          startStreaming();
           return;
         }
       } catch (e) {}
 
-      // 3. Fallback inline sample
-      piDigitsCache = "1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091";
-      initStream();
+      piDigits = "1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091";
+      startStreaming();
     }
 
-    // Initialize Stream Viewport
-    function initStream() {
-      const viewport = document.getElementById('stream-viewport');
-      renderDigitsSlice(0, 400);
-      startStreamLoop();
-    }
+    function renderSlice(start, highlight = null) {
+      if (!piDigits) return;
+      const count = 350;
+      const slice = piDigits.substr(start, count);
 
-    function renderDigitsSlice(start, count, highlightMatch = null) {
-      const viewport = document.getElementById('stream-viewport');
-      if (!piDigitsCache) return;
-
-      const slice = piDigitsCache.substr(start, count);
-      let html = '';
-
-      for (let i = 0; i < slice.length; i++) {
-        const digit = slice[i];
-        const offset = start + i + 1;
-        let cls = 'pi-digit';
-
-        if (highlightMatch && offset >= highlightMatch.start && offset < highlightMatch.end) {
-          cls += ' match-hit';
-        }
-
-        html += `<span class="${cls}" onmousemove="showDigitTooltip(event, '${digit}', ${offset})" onmouseleave="hideDigitTooltip()" onclick="copyDigitIndex(${offset}, '${digit}')">${digit}</span>`;
+      if (highlight && highlight.start >= start && highlight.start < start + count) {
+        const matchRel = highlight.start - start;
+        const before = slice.substring(0, matchRel);
+        const match = slice.substring(matchRel, matchRel + targetQuery.length);
+        const after = slice.substring(matchRel + targetQuery.length);
+        document.getElementById('stream-content').innerHTML = `${before}<span class="match-highlight">${match}</span>${after}`;
+      } else {
+        document.getElementById('stream-content').innerText = slice;
       }
 
-      viewport.innerHTML = html;
-      document.getElementById('offset-counter').innerText = `OFFSET: #${(start + 1).toLocaleString().padStart(7, '0')}`;
-      document.getElementById('stream-scrubber').value = start;
-      document.getElementById('scrub-indicator').innerText = `#${(start + 1).toLocaleString()} / ${piDigitsCache.length.toLocaleString()}`;
+      document.getElementById('offset-indicator').innerText = `Offset: ${(start + 1).toLocaleString()}`;
     }
 
-    // Continuous Stream Loop
-    function startStreamLoop() {
-      if (streamInterval) clearInterval(streamInterval);
-      streamInterval = setInterval(() => {
-        if (!isStreaming || isHyperscan || !piDigitsCache) return;
-
-        streamIndex += Math.max(1, Math.floor(streamSpeed / 10));
-        if (streamIndex >= piDigitsCache.length - 400) {
-          streamIndex = 0;
-        }
-
-        renderDigitsSlice(streamIndex, 400);
-        if (streamIndex % 20 === 0) playTick();
-      }, 100);
+    function startStreaming() {
+      if (streamTimer) clearInterval(streamTimer);
+      renderSlice(0);
+      streamTimer = setInterval(() => {
+        if (!isStreaming || !piDigits) return;
+        streamIndex += 4;
+        if (streamIndex >= piDigits.length - 350) streamIndex = 0;
+        renderSlice(streamIndex);
+      }, 120);
     }
 
     function toggleStream() {
       isStreaming = !isStreaming;
-      document.getElementById('btn-toggle-stream').innerHTML = isStreaming ? '<span id="stream-icon">⏸</span> Pause' : '<span id="stream-icon">▶</span> Resume';
-      document.getElementById('stream-status').innerText = isStreaming ? `● STREAMING (${streamSpeed} d/s)` : '⏸ PAUSED';
-      document.getElementById('stream-status').style.color = isStreaming ? 'var(--emerald)' : 'var(--text-dim)';
+      document.getElementById('btn-stream').innerText = isStreaming ? 'Pause' : 'Resume';
     }
 
-    function rewindStream() {
+    function resetStream() {
       streamIndex = 0;
-      renderDigitsSlice(0, 400);
-      showToast('Stream rewound to decimal offset #1');
-      playTick();
+      renderSlice(0);
+      showToast('Rewound to digit 1');
     }
 
-    function setSpeed(spd, el) {
-      streamSpeed = spd;
-      document.querySelectorAll('.speed-pill').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
-      if (isStreaming) {
-        document.getElementById('stream-status').innerText = `● STREAMING (${streamSpeed} d/s)`;
-      }
-      playTick();
-    }
-
-    function onScrub(val) {
-      streamIndex = parseInt(val) || 0;
-      renderDigitsSlice(streamIndex, 400);
-    }
-
-    // Date Logic
-    function onDateInput() {
-      updateTarget();
-    }
-
-    function handleEnter(e) {
-      if (e.key === 'Enter') executeScan();
-    }
-
-    function setFormat(fmt, el) {
-      currentFormat = fmt;
-      document.querySelectorAll('.fmt-pill').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
-      updateTarget();
-      playTick();
-    }
-
-    function applyPreset(d, m, y, fmt) {
-      document.getElementById('in-day').value = d;
-      document.getElementById('in-month').value = m;
-      document.getElementById('in-year').value = y;
-      currentFormat = fmt;
-      document.querySelectorAll('.fmt-pill').forEach(b => {
-        if (b.dataset.fmt === fmt) b.classList.add('active');
-        else b.classList.remove('active');
-      });
-      updateTarget();
-      playTick();
-      showToast('Loaded preset date');
-    }
-
-    function updateTarget() {
-      const d = String(Math.max(1, Math.min(31, parseInt(document.getElementById('in-day').value) || 1))).padStart(2, '0');
-      const m = String(Math.max(1, Math.min(12, parseInt(document.getElementById('in-month').value) || 1))).padStart(2, '0');
-      const y = String(parseInt(document.getElementById('in-year').value) || 2000).padStart(4, '0');
-      const yy = y.slice(-2);
-
-      let t = '';
-      switch (currentFormat) {
-        case 'DDMMYYYY': t = d + m + y; break;
-        case 'MMDDYYYY': t = m + d + y; break;
-        case 'YYYYMMDD': t = y + m + d; break;
-        case 'DDMMYY': t = d + m + yy; break;
-        case 'DDMM': t = d + m; break;
-        default: t = d + m + y;
-      }
-      targetQuery = t;
-      document.getElementById('target-display').innerText = t;
-    }
-
-    // MAIN ACTION: SCAN CONTINUUM
-    async function executeScan() {
-      const btn = document.getElementById('btn-scan');
-      const scanBeam = document.getElementById('scan-beam');
-      const warpStat = document.getElementById('warp-stat');
-      const streamStatus = document.getElementById('stream-status');
-
+    // Search
+    async function runSearch() {
+      const btn = document.getElementById('btn-search');
+      btn.innerText = 'Searching...';
       btn.disabled = true;
-      btn.innerHTML = '<span class="live-dot"></span> SCANNING...';
-      isHyperscan = true;
-      scanBeam.classList.add('scanning');
-      warpStat.innerText = 'WARP VELOCITY SCAN';
-      warpStat.style.color = 'var(--gold)';
-      streamStatus.innerText = '⚡ HYPER-SCAN ACTIVE';
-      streamStatus.style.color = 'var(--gold)';
 
-      // Hyperspeed animation for visual feedback
-      let warpCount = 0;
-      let warpInterval = setInterval(() => {
-        warpCount++;
-        const randOffset = Math.floor(Math.random() * (piDigitsCache.length - 450));
-        renderDigitsSlice(randOffset, 400);
-        playTick();
-      }, 50);
-
-      const tStart = performance.now();
       let res = null;
 
       try {
         if (window.pywebview && window.pywebview.api && window.pywebview.api.search_pi) {
           res = await window.pywebview.api.search_pi(targetQuery);
         } else {
-          // Direct fallback
-          const localPos = piDigitsCache.indexOf(targetQuery);
+          const localPos = piDigits.indexOf(targetQuery);
           if (localPos !== -1) {
             const startCtx = Math.max(0, localPos - 12);
-            const endCtx = Math.min(piDigitsCache.length, localPos + targetQuery.length + 12);
+            const endCtx = Math.min(piDigits.length, localPos + targetQuery.length + 12);
             res = {
               success: true,
               position: localPos + 1,
-              before: piDigitsCache.substring(startCtx, localPos),
+              before: piDigits.substring(startCtx, localPos),
               matched: targetQuery,
-              after: piDigitsCache.substring(localPos + targetQuery.length, endCtx),
-              source: 'Local Memory Accelerator',
-              latency_ms: Math.round(performance.now() - tStart),
-              in_local: true
+              after: piDigits.substring(localPos + targetQuery.length, endCtx),
+              source: 'Local Cache'
             };
           } else {
             const resp = await fetch("https://www.angio.net/newpi/piquery", {
@@ -1367,161 +671,66 @@
               res = {
                 success: true,
                 position: item.p,
-                before: item.db || '053693610002',
+                before: item.db || '...',
                 matched: targetQuery,
-                after: item.da || '593859644691',
-                source: 'Pi 200M Deep Continuum Index',
-                latency_ms: Math.round(performance.now() - tStart),
-                in_local: false
+                after: item.da || '...',
+                source: 'Pi 200M Index'
               };
             } else {
-              res = { success: false, error: `Sequence ${targetQuery} not found in first 200M digits.` };
+              res = { success: false, error: 'Not found in the first 200 million digits.' };
             }
           }
         }
       } catch (err) {
-        res = { success: false, error: 'Scan error: ' + err };
+        res = { success: false, error: 'Search failed: ' + err };
       }
 
-      // Conclude scan
-      clearInterval(warpInterval);
-      isHyperscan = false;
-      scanBeam.classList.remove('scanning');
+      btn.innerText = 'Search';
       btn.disabled = false;
-      btn.innerHTML = '<span id="scan-btn-icon">⚡</span> SCAN PI DIGITS';
-      warpStat.innerText = 'TARGET LOCATED';
-      warpStat.style.color = 'var(--emerald)';
-      streamStatus.innerText = '🎯 TARGET LOCKED';
-      streamStatus.style.color = 'var(--emerald)';
 
       if (res && res.success) {
-        lastResult = res;
-        playLockChime();
-        displayResultHud(res);
-
-        // Highlight directly in stream if inside local buffer
-        if (res.position <= piDigitsCache.length) {
-          streamIndex = Math.max(0, res.position - 25);
-          renderDigitsSlice(streamIndex, 400, {
-            start: res.position,
-            end: res.position + targetQuery.length
-          });
+        currentResult = res;
+        showResult(res);
+        if (res.position <= piDigits.length) {
+          streamIndex = Math.max(0, res.position - 15);
+          renderSlice(streamIndex, { start: res.position - 1 });
         }
-        showToast(`Located at position #${Number(res.position).toLocaleString()}!`);
       } else {
-        warpStat.innerText = 'NOT FOUND IN 200M';
-        warpStat.style.color = 'var(--gold)';
-        showToast(res ? res.error : 'Sequence not found');
+        showToast(res ? res.error : 'Not found');
       }
     }
 
-    function displayResultHud(res) {
-      const hud = document.getElementById('result-hud');
-      hud.style.display = 'flex';
-
-      document.getElementById('res-offset').innerText = '#' + Number(res.position).toLocaleString();
-      document.getElementById('res-latency').innerText = (res.latency_ms || 35) + ' ms';
-      document.getElementById('res-engine-tag').innerText = 'Verified via ' + (res.source || '200M Index');
-      document.getElementById('res-source-sub').innerText = res.in_local ? 'Found in local instant memory' : 'Found in 200M deep index';
-
-      const expOdds = Math.pow(10, String(targetQuery).length);
-      document.getElementById('res-prob').innerText = '1 in ' + expOdds.toLocaleString();
-
-      document.getElementById('tape-before').innerText = res.before;
-      document.getElementById('tape-match').innerText = `[ ${res.matched} ]`;
-      document.getElementById('tape-after').innerText = res.after;
-
-      hud.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function jumpStreamToResult() {
-      if (lastResult.position <= piDigitsCache.length) {
-        streamIndex = Math.max(0, lastResult.position - 25);
-        renderDigitsSlice(streamIndex, 400, {
-          start: lastResult.position,
-          end: lastResult.position + targetQuery.length
-        });
-        showToast(`Jumped to offset #${lastResult.position.toLocaleString()}`);
-        playTick();
-      } else {
-        showToast(`Offset #${lastResult.position.toLocaleString()} exceeds local 250k buffer (located in 200M index)`);
-      }
+    function showResult(res) {
+      const card = document.getElementById('result-card');
+      card.style.display = 'flex';
+      document.getElementById('result-pos').innerText = Number(res.position).toLocaleString();
+      document.getElementById('result-source').innerText = res.source || '200M Index';
+      document.getElementById('tape-before').innerText = '...' + (res.before || '');
+      document.getElementById('tape-matched').innerText = res.matched;
+      document.getElementById('tape-after').innerText = (res.after || '') + '...';
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function copyPosition() {
-      navigator.clipboard.writeText(String(lastResult.position));
-      showToast(`Copied position #${Number(lastResult.position).toLocaleString()} to clipboard`);
-      playTick();
+      navigator.clipboard.writeText(String(currentResult.position));
+      showToast('Position copied to clipboard');
     }
 
-    function copyFullTape() {
-      const tape = `...${lastResult.before} [${lastResult.matched}] ${lastResult.after}...`;
-      navigator.clipboard.writeText(tape);
-      showToast('Copied full context tape to clipboard');
-      playTick();
-    }
-
-    // Modal Certificate
-    function openCertModal() {
-      const modal = document.getElementById('cert-modal');
-      const text = `
-╔═══════════════════════════════════════════════════════════════════════╗
-║                   CERTIFICATE OF EXISTENCE IN PI                      ║
-╠═══════════════════════════════════════════════════════════════════════╣
-║                                                                       ║
-║  TARGET DATE COORDINATES:                                             ║
-║  ★  ${targetQuery.padEnd(65, ' ')}║
-║                                                                       ║
-║  DECIMAL OFFSET POSITION IN π:                                        ║
-║  👉 #${Number(lastResult.position).toLocaleString().padEnd(64, ' ')}║
-║                                                                       ║
-║  COSMIC TELEMETRY VERIFICATION TAPE:                                  ║
-║  ... ${lastResult.before} [ ${lastResult.matched} ] ${lastResult.after} ...
-║                                                                       ║
-║  MATHEMATICAL VERIFICATION:                                           ║
-║  Because π is an infinite, transcendental, and normal constant,       ║
-║  this coordinate sequence is fundamentally embedded in spacetime.     ║
-║                                                                       ║
-║  Engine: ${String(lastResult.source).padEnd(59, ' ')}║
-╚═══════════════════════════════════════════════════════════════════════╝
-`.trim();
-      document.getElementById('cert-text').innerText = text;
-      modal.classList.add('open');
-      playTick();
-    }
-
-    function closeCertModal() {
-      document.getElementById('cert-modal').classList.remove('open');
-    }
-
-    function closeCertOnBackdrop(e) {
-      if (e.target.id === 'cert-modal') closeCertModal();
-    }
-
-    function copyCertificate() {
-      navigator.clipboard.writeText(document.getElementById('cert-text').innerText);
-      showToast('Official Certificate copied to clipboard!');
-      playTick();
-    }
-
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
+    function copyContext() {
+      const text = `...${currentResult.before} [${currentResult.matched}] ${currentResult.after}... at position #${currentResult.position.toLocaleString()}`;
+      navigator.clipboard.writeText(text);
+      showToast('Sequence details copied');
     }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.innerText = msg;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2800);
+      setTimeout(() => toast.classList.remove('show'), 2400);
     }
 
-    // Initial setup
     updateTarget();
-    loadPiDigits();
+    initDigits();
   </script>
 </body>
 </html>
