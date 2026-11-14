@@ -564,7 +564,7 @@
           <span id="search-state-tag" class="search-state-tag">Idle</span>
         </div>
         <div class="stream-controls">
-          <button id="btn-stream" class="btn-control" onclick="toggleStream()">Pause</button>
+          <button id="btn-stream" class="btn-control" onclick="toggleStream()">Stream</button>
           <button class="btn-control" onclick="rewindToStart()">Reset</button>
         </div>
       </div>
@@ -621,7 +621,7 @@
     let targetQuery = '14031879';
     let piDigits = window.LOCAL_PI_DIGITS || '';
     let currentSearchOffset = 0;
-    let isStreaming = true;
+    let isStreaming = false;
     let isActivelyScanning = false;
     let ambientTimer = null;
     let scanAnimationId = null;
@@ -701,7 +701,7 @@
     function onDigitsLoaded() {
       document.getElementById('scrubber').max = Math.max(100, piDigits.length - 280);
       renderViewport(0);
-      startAmbientStream();
+      document.getElementById('velocity-label').innerText = 'Stopped';
     }
 
     /**
@@ -764,19 +764,26 @@
 
     function toggleStream() {
       isStreaming = !isStreaming;
-      document.getElementById('btn-stream').innerText = isStreaming ? 'Pause' : 'Resume';
-      if (!isStreaming) {
-        document.getElementById('velocity-label').innerText = 'Paused';
+      document.getElementById('btn-stream').innerText = isStreaming ? 'Pause' : 'Stream';
+      if (isStreaming) {
+        startAmbientStream();
+        document.getElementById('velocity-label').innerText = '10 d/s';
+      } else {
+        if (ambientTimer) { clearInterval(ambientTimer); ambientTimer = null; }
+        document.getElementById('velocity-label').innerText = 'Stopped';
       }
     }
 
     function rewindToStart() {
-      if (scanAnimationId) cancelAnimationFrame(scanAnimationId);
+      if (scanAnimationId) { cancelAnimationFrame(scanAnimationId); scanAnimationId = null; }
+      if (ambientTimer) { clearInterval(ambientTimer); ambientTimer = null; }
       isActivelyScanning = false;
+      isStreaming = false;
       currentSearchOffset = 0;
       renderViewport(0);
       document.getElementById('search-state-tag').innerText = 'Idle';
-      document.getElementById('velocity-label').innerText = '0 d/s';
+      document.getElementById('velocity-label').innerText = 'Stopped';
+      document.getElementById('btn-stream').innerText = 'Stream';
       document.getElementById('btn-search').disabled = false;
       document.getElementById('btn-search').innerText = 'Search';
       showToast('Rewound to digit 1');
@@ -894,11 +901,15 @@
             document.getElementById('velocity-label').innerText = Math.round(velocity).toLocaleString() + ' d/s';
 
             if (currentPos >= targetOffset) {
-              // LOCKED ON TARGET
+              // LOCKED ON TARGET - STOP COMPLETELY
+              if (scanAnimationId) { cancelAnimationFrame(scanAnimationId); scanAnimationId = null; }
+              if (ambientTimer) { clearInterval(ambientTimer); ambientTimer = null; }
               isActivelyScanning = false;
+              isStreaming = false;
+              document.getElementById('btn-stream').innerText = 'Stream';
               renderViewport(targetOffset, { locked: true, index: targetOffset });
               document.getElementById('search-state-tag').innerText = 'Locked at #' + (targetOffset + 1).toLocaleString();
-              document.getElementById('velocity-label').innerText = 'Locked';
+              document.getElementById('velocity-label').innerText = 'Stopped';
               btn.innerText = 'Search';
               btn.disabled = false;
               showResult(searchResult);
@@ -926,10 +937,14 @@
                 document.getElementById('active-offset-val').innerText = Math.floor(simulatedMillionsOffset).toLocaleString();
                 document.getElementById('velocity-label').innerText = 'Scanning deep index...';
               } else {
-                // Lock on deep context
+                // Lock on deep context - STOP COMPLETELY
+                if (scanAnimationId) { cancelAnimationFrame(scanAnimationId); scanAnimationId = null; }
+                if (ambientTimer) { clearInterval(ambientTimer); ambientTimer = null; }
                 isActivelyScanning = false;
+                isStreaming = false;
+                document.getElementById('btn-stream').innerText = 'Stream';
                 document.getElementById('search-state-tag').innerText = 'Locked at #' + Number(searchResult.position).toLocaleString();
-                document.getElementById('velocity-label').innerText = 'Locked';
+                document.getElementById('velocity-label').innerText = 'Stopped';
                 document.getElementById('active-offset-val').innerText = Number(searchResult.position).toLocaleString();
                 document.getElementById('stream-content').innerHTML = `...${searchResult.before}<span class="match-highlight">${searchResult.matched}</span>${searchResult.after}...`;
                 btn.innerText = 'Search';
