@@ -15,12 +15,12 @@ pub struct SearchResult {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum DateFormat {
-    DDMMYYYY, // 25052009
-    MMDDYYYY, // 05252009
-    YYYYMMDD, // 20090525
-    DDMMYY,   // 250509
-    MMDDYY,   // 052509
-    DDMM,     // 2505
+    DDMMYYYY, // 14031879
+    MMDDYYYY, // 03141879
+    YYYYMMDD, // 18790314
+    DDMMYY,   // 140379
+    MMDDYY,   // 031479
+    DDMM,     // 1403
 }
 
 impl DateFormat {
@@ -37,12 +37,12 @@ impl DateFormat {
 
     pub fn label(&self) -> &'static str {
         match self {
-            DateFormat::DDMMYYYY => "DD/MM/YYYY (e.g. 25052009)",
-            DateFormat::MMDDYYYY => "MM/DD/YYYY (e.g. 05252009)",
-            DateFormat::YYYYMMDD => "YYYY/MM/DD (e.g. 20090525)",
-            DateFormat::DDMMYY => "DD/MM/YY   (e.g. 250509)",
-            DateFormat::MMDDYY => "MM/DD/YY   (e.g. 052509)",
-            DateFormat::DDMM => "DD/MM      (e.g. 2505)",
+            DateFormat::DDMMYYYY => "DD/MM/YYYY (e.g. 14031879)",
+            DateFormat::MMDDYYYY => "MM/DD/YYYY (e.g. 03141879)",
+            DateFormat::YYYYMMDD => "YYYY/MM/DD (e.g. 18790314)",
+            DateFormat::DDMMYY => "DD/MM/YY   (e.g. 140379)",
+            DateFormat::MMDDYY => "MM/DD/YY   (e.g. 031479)",
+            DateFormat::DDMM => "DD/MM      (e.g. 1403)",
         }
     }
 

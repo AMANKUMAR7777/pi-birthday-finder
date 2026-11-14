@@ -58,9 +58,9 @@ cargo build --release
 $\pi$ is an irrational number, which means its decimal representation never ends and never repeats.
 
 Mathematicians strongly conjecture that $\pi$ is a **normal number**, meaning that every finite sequence of digits occurs infinitely often with uniform distribution:
-- **4-Digit Sequence** (e.g. `2505`): $10^4 = 10,000$ combinations. On average occurs in the first ~10,000 digits.
-- **6-Digit Sequence** (e.g. `250509`): $10^6 = 1,000,000$ combinations. Usually found within the first ~2-3 million digits.
-- **8-Digit Sequence** (e.g. `25052009`): $10^8 = 100,000,000$ combinations. Usually found within the first 100-200 million digits (e.g. `25052009` occurs at digit **#140,930,892**).
+- **4-Digit Sequence** (e.g. `1403` - Pi Day): $10^4 = 10,000$ combinations. On average occurs in the first ~10,000 digits.
+- **6-Digit Sequence** (e.g. `140379`): $10^6 = 1,000,000$ combinations. Usually found within the first ~2-3 million digits.
+- **8-Digit Sequence** (e.g. `14031879` - Einstein's Birthday on Pi Day): $10^8 = 100,000,000$ combinations. Found at decimal position **#11,885,022**.
 
 ---
 
